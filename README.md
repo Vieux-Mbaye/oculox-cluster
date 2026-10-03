@@ -13,7 +13,18 @@ au depot Gitea source.
 - port `8404/TCP` reserve a la supervision ;
 - ne jamais exposer `9300/TCP` hors du reseau Docker.
 
-## 2. Configurer Le Cluster
+## 2. Cloner Le Depot Cluster
+
+```bash
+git clone <URL_DEPOT_OCULOX_CLUSTER> ~/oculox-cluster
+cd ~/oculox-cluster
+git status --short
+```
+
+La derniere commande ne doit rien afficher. Utilisez la meme version ou le meme
+tag Oculox sur les trois VM.
+
+## 3. Configurer Le Cluster
 
 ```bash
 cd ~/oculox-cluster
@@ -59,7 +70,7 @@ L'installation est reexecutable apres interruption et ne remplace pas une PKI
 existante. Elle prepare Docker, genere la PKI OpenSearch, les comptes techniques,
 HAProxy et OpenSearch Security, puis demarre les trois noeuds.
 
-## 3. Verifier
+## 4. Verifier
 
 ```bash
 ./oculox cluster status
@@ -79,7 +90,7 @@ curl --cacert dev/generated/opensearch-cluster/pki/client-trust/oculox-opensearc
 et mots de passe techniques sont conserves dans
 `dev/generated/opensearch-cluster/security/accounts.env` en mode `600`.
 
-## 4. Creer Les Bundles
+## 5. Creer Les Bundles
 
 ```bash
 mkdir -p ~/oculox-bundles
@@ -93,7 +104,7 @@ mkdir -p ~/oculox-bundles
 - `hedgehog` contient uniquement les acces necessaires au Collecteur ;
 - les bundles contiennent des secrets et restent hors Git.
 
-## 5. Configurer OIDC Apres Keycloak
+## 6. Configurer OIDC Apres Keycloak
 
 Apres `./oculox keycloak provision` sur le Core, recevoir sa CA publique dans
 `/tmp/oculox-web-ca.crt`, puis executer :
@@ -116,7 +127,7 @@ La methode Basic de secours OpenSearch reste presente pendant l'activation
 OIDC. Une mauvaise configuration Keycloak ne doit donc pas supprimer le chemin
 d'administration technique.
 
-## 6. Exploitation
+## 7. Exploitation
 
 ```bash
 ./oculox cluster start
