@@ -90,19 +90,35 @@ curl --cacert dev/generated/opensearch-cluster/pki/client-trust/oculox-opensearc
 et mots de passe techniques sont conserves dans
 `dev/generated/opensearch-cluster/security/accounts.env` en mode `600`.
 
-## 5. Creer Les Bundles
+## 5. Utiliser Les Bundles Crees Par L'installation
+
+L'installation du Cluster cree automatiquement les deux bundles dans :
 
 ```bash
-mkdir -p ~/oculox-bundles
-./oculox cluster client-bundle core ~/oculox-bundles/core
-./oculox cluster client-bundle hedgehog ~/oculox-bundles/hedgehog
-(cd ~/oculox-bundles/core && sha256sum -c SHA256SUMS)
-(cd ~/oculox-bundles/hedgehog && sha256sum -c SHA256SUMS)
+dev/generated/opensearch-cluster/client-bundles/core
+dev/generated/opensearch-cluster/client-bundles/hedgehog
 ```
 
 - `core` contient les comptes necessaires a Logstash, Dashboards, Arkime, API ;
 - `hedgehog` contient uniquement les acces necessaires au Collecteur ;
 - les bundles contiennent des secrets et restent hors Git.
+
+Verifier les bundles automatiques avant leur transfert :
+
+```bash
+(cd dev/generated/opensearch-cluster/client-bundles/core && sha256sum -c SHA256SUMS)
+(cd dev/generated/opensearch-cluster/client-bundles/hedgehog && sha256sum -c SHA256SUMS)
+```
+
+La commande `client-bundle` est optionnelle. Elle sert seulement a reexporter
+un bundle vers un autre emplacement, ou a le recreer si le bundle automatique
+a ete supprime. Le repertoire de sortie ne doit pas deja exister :
+
+```bash
+mkdir -p ~/oculox-bundles
+./oculox cluster client-bundle core ~/oculox-bundles/core
+./oculox cluster client-bundle hedgehog ~/oculox-bundles/hedgehog
+```
 
 ## 6. Configurer OIDC Apres Keycloak
 
