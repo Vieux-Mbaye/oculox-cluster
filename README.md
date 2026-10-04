@@ -8,10 +8,23 @@ au depot Gitea source.
 
 - VM Debian/Ubuntu, compte avec `sudo`, heure synchronisee ;
 - IP stable attribuee a une interface locale ;
-- profil production : au moins 4 CPU, 14 Gio de RAM et 200 Gio libres ;
+- profil production : au moins 4 CPU, 14 Gio de RAM et 100 Gio libres ;
 - port `9200/TCP` autorise depuis Core et Collecteurs ;
 - port `8404/TCP` reserve a la supervision ;
 - ne jamais exposer `9300/TCP` hors du reseau Docker.
+
+Le profil `lab` exige au moins 4 CPU, 6 Gio de RAM et 25 Gio libres, avec un
+heap maximal de `1g` par noeud. Le profil `production` exige un heap minimal de
+`2g` par noeud. Les minima disque sont des controles d'installation, pas un
+dimensionnement de retention.
+
+```bash
+hostname -I
+timedatectl status
+free -h
+df -h /
+nproc
+```
 
 ## 2. Cloner Le Depot Cluster
 
@@ -47,6 +60,11 @@ Reglages essentiels :
 | `watermarks` | seuils d'occupation disque |
 | `delete_enabled` | laisser `false` tant que la retention n'est pas validee |
 
+Contraintes validees automatiquement : `profile` vaut `lab` ou `production`,
+le heap utilise `2g` ou `2048m`, `replicas` vaut `1` ou `2`, les ports sont
+distincts et `low < high < flood_stage`. `snapshots.enabled` doit rester
+`false` car cette fonction n'est pas encore disponible dans ce parcours.
+
 Verifier sans demarrer :
 
 ```bash
@@ -70,6 +88,12 @@ L'installation est reexecutable apres interruption et ne remplace pas une PKI
 existante. Elle prepare Docker, genere la PKI OpenSearch, les comptes techniques,
 HAProxy et OpenSearch Security, puis demarre les trois noeuds.
 
+Elle attend ensuite un cluster vert, applique les politiques et cree les deux
+bundles. Ne pas interrompre les redemarrages progressifs. Une trace Java
+`ClosedSelectorException` apres Security Admin correspond a la fermeture de
+son client HTTP ; elle est sans gravite uniquement si
+`SECURITY_INITIALIZATION_RESULT=PASS` est affiche et que la commande termine.
+
 ## 4. Verifier
 
 ```bash
@@ -89,6 +113,10 @@ curl --cacert dev/generated/opensearch-cluster/pki/client-trust/oculox-opensearc
 `curl` demande le mot de passe sans l'inscrire dans l'historique. Les comptes
 et mots de passe techniques sont conserves dans
 `dev/generated/opensearch-cluster/security/accounts.env` en mode `600`.
+
+Le JSON doit indiquer `status: green` et `unassigned_shards: 0`. Des lignes
+`401 No Authorization header` dans les logs peuvent provenir d'une sonde non
+authentifiee ; la sante des conteneurs et la requete authentifiee font foi.
 
 ## 5. Utiliser Les Bundles Crees Par L'installation
 
@@ -139,6 +167,10 @@ Arguments :
 - `--realm` : realm humain Oculox, normalement `oculox` ;
 - `--keycloak-ca` : CA publique qui permet aux noeuds de verifier le Core.
 
+L'argument optionnel `--client-id` vaut par defaut `oculox-dashboards`. La
+commande peut recreer progressivement les noeuds pour installer la CA, puis
+applique OIDC. Attendre le message final avant d'activer Dashboards sur le Core.
+
 La methode Basic de secours OpenSearch reste presente pendant l'activation
 OIDC. Une mauvaise configuration Keycloak ne doit donc pas supprimer le chemin
 d'administration technique.
@@ -164,6 +196,35 @@ Pour appliquer heap, watermarks ou politiques sans changer l'endpoint :
 Ne jamais utiliser `docker compose down -v` : les volumes contiennent les
 index. Sauvegarder hors de la VM les bundles et secrets selon la politique de
 l'organisation.
+
+Apres un redemarrage de VM :
+
+```bash
+cd ~/oculox-cluster
+./oculox cluster start
+./oculox cluster status
+./oculox cluster validate
+```
+
+`cluster apply` accepte heap, watermarks et politiques, mais refuse de changer
+le nom ou l'endpoint d'un cluster existant. Ces identites exigent une migration
+planifiee.
+
+## 8. Depannage Et Recette Finale
+
+| Symptome | Cause probable | Action |
+|---|---|---|
+| `cluster status` echoue | mauvais repertoire | `cd ~/oculox-cluster` |
+| IP refusee | IP absente de la VM | verifier `ip -br address` |
+| port occupe | service sur 9200/8404 | verifier avec `ss -ltnp` |
+| cluster jaune/rouge persistant | noeud, disque ou replicas | consulter logs et watermarks |
+| checksum bundle invalide | copie incomplete | recopier le bundle automatique |
+| OIDC refuse Keycloak | CA ou URL incorrecte | verifier certificat, dates et URL |
+
+Le Cluster est accepte lorsque le precontrole passe, les quatre conteneurs sont
+sains, l'API retourne `green` avec zero shard non affecte, `cluster validate`
+passe, les deux bundles sont intacts et un redemarrage complet revient au vert
+sans perte d'index. Ne jamais utiliser `docker volume prune` sur cette VM.
 
 Documentation complementaire :
 
