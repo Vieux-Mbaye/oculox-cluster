@@ -8,7 +8,8 @@ au depot Gitea source.
 
 - VM Debian/Ubuntu, compte avec `sudo`, heure synchronisee ;
 - IP stable attribuee a une interface locale ;
-- profil production : au moins 4 CPU, 14 Gio de RAM et 100 Gio libres ;
+- profil production : minimum controle de 4 CPU, 12 Gio de RAM et 100 Gio
+  libres ; 14 Gio ou plus sont recommandes pour la recette ;
 - port `9200/TCP` autorise depuis Core et Collecteurs ;
 - port `8404/TCP` reserve a la supervision ;
 - ne jamais exposer `9300/TCP` hors du reseau Docker.
@@ -19,6 +20,8 @@ heap maximal de `1g` par noeud. Le profil `production` exige un heap minimal de
 dimensionnement de retention.
 
 ```bash
+sudo apt update
+sudo apt install -y git curl ca-certificates
 hostname -I
 timedatectl status
 free -h
