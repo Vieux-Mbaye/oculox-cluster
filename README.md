@@ -32,13 +32,14 @@ nproc
 ## 2. Cloner Le Depot Cluster
 
 ```bash
-git clone <URL_DEPOT_OCULOX_CLUSTER> ~/oculox-cluster
+git clone https://github.com/Vieux-Mbaye/oculox-cluster.git ~/oculox-cluster
 cd ~/oculox-cluster
 git status --short
 ```
 
-La derniere commande ne doit rien afficher. Utilisez la meme version ou le meme
-tag Oculox sur les trois VM.
+La derniere commande ne doit rien afficher. Le depot est prive : configurez
+l'authentification GitHub de la VM avant le clone (cle SSH ou identifiant Git
+avec jeton de lecture). Ne placez jamais le jeton dans l'URL clonee.
 
 ## 3. Configurer Le Cluster
 
