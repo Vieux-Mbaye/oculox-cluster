@@ -98,7 +98,6 @@ son client HTTP ; elle est sans gravite uniquement si
 ```bash
 ./oculox cluster status
 ./oculox cluster validate
-./oculox cluster logs opensearch-1
 ```
 
 Resultat attendu : trois noeuds, etat `green`, zero shard non affecte.
@@ -147,7 +146,7 @@ mkdir -p ~/oculox-bundles
 ./oculox cluster client-bundle hedgehog ~/oculox-bundles/hedgehog
 ```
 
-## 6. Configurer OIDC Apres Keycloak
+## 6. Configurer OIDC Apres Keycloak (Apres le proviswionnement de keycloak dans le core)
 
 Apres `./oculox keycloak provision` sur le Core, recevoir sa CA publique dans
 `/tmp/oculox-web-ca.crt`, puis executer :
