@@ -146,7 +146,7 @@ mkdir -p ~/oculox-bundles
 ./oculox cluster client-bundle hedgehog ~/oculox-bundles/hedgehog
 ```
 
-## 6. Configurer OIDC Apres Keycloak (Apres le proviswionnement de keycloak dans le core)
+## 6. Configurer OIDC Apres Keycloak (Apres le provisionnement de keycloak dans le core)
 
 Apres `./oculox keycloak provision` sur le Core, recevoir sa CA publique dans
 `/tmp/oculox-web-ca.crt`, puis executer :
