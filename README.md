@@ -22,11 +22,6 @@ dimensionnement de retention.
 ```bash
 sudo apt update
 sudo apt install -y git curl ca-certificates
-hostname -I
-timedatectl status
-free -h
-df -h /
-nproc
 ```
 
 ## 2. Cloner Le Depot Cluster
